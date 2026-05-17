@@ -3,8 +3,8 @@ Simple binary patcher that includes various bug and security fixes for the 3.3.5
 
 ## Patches:
  - Large Address Aware
- - stoneharry's Remote Code Exploit (RCE) fix
- - robinsch's WoWFix335 fixes
+ - robinsch's RCE fixes
+ - WoWFix335
  - Recalculated PE checksum
 
 ## Usage
@@ -13,5 +13,4 @@ $ client-patcher <file_path>
 ```
 
 ## Credit
- - https://github.com/stoneharry/RCEPatcher
  - robinsch for WoWFix335

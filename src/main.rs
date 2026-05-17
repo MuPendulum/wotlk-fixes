@@ -62,8 +62,11 @@ fn main() {
     // large address aware
     patch(&mut wow, 0x126, &[0x23]);
 
-    // stoneharry's RCE fix
+    // remote code execution exploit
     patch(&mut wow, 0x2A7, &[0xC0]);
+
+    // remote code execution exploit (2)
+    nop(&mut wow, 0x3D9D7C, 2);
 
     // windowed mode to full screen
     patch(&mut wow, 0xE94, &[0xEB]);
