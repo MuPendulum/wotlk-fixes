@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Unlicense
+
 use std::{env, fs};
 
 fn patch(data: &mut [u8], off: usize, bytes: &[u8]) {
