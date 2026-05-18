@@ -1,0 +1,68 @@
+name: Build Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            suffix: .exe
+            archive_ext: zip
+
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            suffix: ""
+            archive_ext: tar.gz
+
+    env:
+      TARGET: ${{ matrix.target }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install musl-tools
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends musl-tools
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Prepare artifacts
+        shell: bash
+        run: |
+          mkdir -p "$TARGET"
+          cp UNLICENSE "$TARGET/"
+          cp README.md "$TARGET/"
+          cp "target/$TARGET/release/client-patcher${{ matrix.suffix }}" "$TARGET/"
+
+      - name: Package artifacts
+        shell: bash
+        run: |
+          if [[ "${{ matrix.archive_ext }}" == "zip" ]]; then
+            7z a -tzip -mfb=258 -mpass=15 "client-patcher-${TARGET}.zip" "$TARGET"
+          else
+            tar -cf "client-patcher-${TARGET}.tar" "$TARGET"
+            7z a -tgzip -mfb=258 -mpass=15 "client-patcher-${TARGET}.tar.gz" "client-patcher-${TARGET}.tar" -sdel
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          path: client-patcher-${{ matrix.target }}.${{ matrix.archive_ext }}
+          archive: false
