@@ -26,6 +26,7 @@ jobs:
 
     env:
       TARGET: ${{ matrix.target }}
+      ARTIFACT_DIR: client-patcher-${{ matrix.target }}
 
     steps:
       - uses: actions/checkout@v6
@@ -46,23 +47,23 @@ jobs:
       - name: Prepare artifacts
         shell: bash
         run: |
-          mkdir -p "$TARGET"
-          cp UNLICENSE "$TARGET/"
-          cp README.md "$TARGET/"
-          cp "target/$TARGET/release/client-patcher${{ matrix.suffix }}" "$TARGET/"
+          mkdir -p "$ARTIFACT_DIR"
+          cp UNLICENSE "$ARTIFACT_DIR/"
+          cp README.md "$ARTIFACT_DIR/"
+          cp "target/$TARGET/release/client-patcher${{ matrix.suffix }}" "$ARTIFACT_DIR/"
 
       - name: Package artifacts
         shell: bash
         run: |
           if [[ "${{ matrix.archive_ext }}" == "zip" ]]; then
-            7z a -tzip -mfb=258 -mpass=15 "client-patcher-${TARGET}.zip" "$TARGET"
+            7z a -tzip -mfb=258 -mpass=15 "${ARTIFACT_DIR}.zip" "$ARTIFACT_DIR"
           else
-            tar -cf "client-patcher-${TARGET}.tar" "$TARGET"
-            7z a -tgzip -mfb=258 -mpass=15 "client-patcher-${TARGET}.tar.gz" "client-patcher-${TARGET}.tar" -sdel
+            tar -cf "${ARTIFACT_DIR}.tar" "$ARTIFACT_DIR"
+            7z a -tgzip -mfb=258 -mpass=15 "${ARTIFACT_DIR}.tar.gz" "${ARTIFACT_DIR}.tar" -sdel
           fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          path: client-patcher-${{ matrix.target }}.${{ matrix.archive_ext }}
+          path: ${{ env.ARTIFACT_DIR }}.${{ matrix.archive_ext }}
           archive: false
