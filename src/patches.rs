@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 
 use crate::checksum::update_pe_checksum;
+use crate::config::Config;
 
 fn patch(data: &mut [u8], offset: usize, bytes: &[u8]) {
     data[offset..][..bytes.len()].copy_from_slice(bytes);
@@ -10,16 +11,19 @@ fn nop(data: &mut [u8], offset: usize, len: usize) {
     data[offset..][..len].fill(0x90);
 }
 
-pub fn patch_wow(wow: &mut [u8]) {
-    // large address aware
+fn large_address_aware(wow: &mut [u8]) {
     patch(wow, 0x126, &[0x23]);
+}
 
+fn rce_fixes(wow: &mut [u8]) {
     // remote code execution exploit
     patch(wow, 0x2A7, &[0xC0]);
 
     // remote code execution exploit (2)
     nop(wow, 0x3D9D7C, 2);
+}
 
+fn wowfix335(wow: &mut [u8]) {
     // windowed mode to full screen
     patch(wow, 0xE94, &[0xEB]);
 
@@ -32,11 +36,10 @@ pub fn patch_wow(wow: &mut [u8]) {
     // "ghost" attack when NPC evades from combat
     patch(wow, 0x355BF, &[0xEB]);
 
-    // missing pre cast animation when canceling channeled spells
+    // missing pre-cast animation when canceling channeled spells
     nop(wow, 0x33E0D6, 22);
 
-    // mouse flickering and camera snapping issue when mouse has high report rate
-    // credits to bonbigz
+    // mouse flickering and camera snapping at high mouse report rates (credits: bonbigz)
     patch(wow, 0x469A2C, &[0xE9, 0x71, 0xF0, 0x0B, 0x00, 0xF8, 0x13, 0xD4, 0x00, 0x8B, 0x1D, 0xFC]);
     patch(wow, 0x528AA2, &[0x8D, 0x4D, 0xF0, 0x51, 0x57, 0xFF, 0x15, 0xDC, 0xF5, 0x9D, 0x00, 0x8B, 0x45, 0xF0, 0x8B, 0x15, 0xF8, 0x13, 0xD4, 0x00, 0xE9, 0x7A, 0x0F, 0xF4, 0xFF]);
     patch(wow, 0x4691B1, &[0x89, 0xE5, 0x8B, 0x05, 0xFC, 0x13, 0xD4, 0x00, 0x8B, 0x0D, 0xF8, 0x13, 0xD4, 0x00, 0xEB, 0xC2, 0x7D, 0x03, 0x83, 0xC1, 0x01, 0x83, 0xC0, 0x32, 0x83, 0xC1, 0x32, 0x3B, 0x0D, 0xEC, 0xBC, 0xCA, 0x00, 0x7E, 0x03, 0x83, 0xE9, 0x01, 0x3B, 0x05, 0xF0, 0xBC, 0xCA, 0x00, 0x7E, 0x03, 0x83, 0xE8, 0x01, 0x83, 0xE9, 0x32, 0x83, 0xE8, 0x32, 0x89, 0x0D, 0xF8, 0x13, 0xD4, 0x00, 0x89, 0x05, 0xFC, 0x13, 0xD4, 0x00, 0x89, 0xEC, 0x5D, 0xE9, 0xB4, 0xF7, 0xFF, 0xFF, 0xEC, 0x5D, 0xC3, 0xC3]);
@@ -45,19 +48,25 @@ pub fn patch_wow(wow: &mut [u8]) {
     // naked character issue (disables SPELL_AURA_X_RAY)
     patch(wow, 0x1DDC5D, &[0xEB]);
 
-    // patch mail request timeout
-    // you no longer need to wait 60 seconds or relog to receive new mail
-    patch(wow, 0x16D899, &[0x05, 0x01, 0x00, 0x00, 0x00]);
-
     // patch area trigger timer to be more precise (250ms -> 50ms)
     patch(wow, 0x2DB241, &[0x32]);
 
-    // Return of "The Blue Moon"
+    // return of "The Blue Moon"
     patch(wow, 0x5CFBC0, &[0xC7, 0x05, 0x74, 0x8E, 0xD3, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xC3]);
 
-    // Allow chat commands while dead
+    // allow chat commands while dead
     patch(wow, 0x10CA41, &[0xEB]);
+}
 
-    // Recompute and write PE checksum
-    update_pe_checksum(wow);
+fn wowfix335_mail_fix(wow: &mut [u8]) {
+    // patch mail request timeout; no longer need to wait 60 seconds or relog to receive new mail
+    patch(wow, 0x16D899, &[0x05, 0x01, 0x00, 0x00, 0x00]);
+}
+
+pub fn patch_wow(wow: &mut [u8], config: &Config) {
+    if config.is_enabled("LargeAddressAware") { large_address_aware(wow); }
+    if config.is_enabled("RCEFixes")          { rce_fixes(wow); }
+    if config.is_enabled("WoWFix335")         { wowfix335(wow); }
+    if config.is_enabled("WoWFix335MailFix")  { wowfix335_mail_fix(wow); }
+    if config.is_enabled("UpdatePEChecksum")  { update_pe_checksum(wow); }
 }

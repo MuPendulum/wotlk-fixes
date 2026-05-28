@@ -51,6 +51,7 @@ jobs:
           cp UNLICENSE "$ARTIFACT_DIR/"
           cp THIRD-PARTY-NOTICES "$ARTIFACT_DIR/"
           cp README.md "$ARTIFACT_DIR/"
+          cp config.ini "$ARTIFACT_DIR/"
           cp "target/$TARGET/release/client-patcher${{ matrix.suffix }}" "$ARTIFACT_DIR/"
 
       - name: Package artifacts
