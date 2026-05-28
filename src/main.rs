@@ -4,12 +4,12 @@ use std::{env, fs};
 
 const PE_CHECKSUM_OFFSET: usize = 0x168;
 
-fn patch(data: &mut [u8], off: usize, bytes: &[u8]) {
-    data[off..][..bytes.len()].copy_from_slice(bytes);
+fn patch(data: &mut [u8], offset: usize, bytes: &[u8]) {
+    data[offset..][..bytes.len()].copy_from_slice(bytes);
 }
 
-fn nop(data: &mut [u8], off: usize, len: usize) {
-    data[off..][..len].fill(0x90);
+fn nop(data: &mut [u8], offset: usize, len: usize) {
+    data[offset..][..len].fill(0x90);
 }
 
 fn pe_checksum(data: &[u8]) -> u32 {
