@@ -42,13 +42,14 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --frozen --release --target ${{ matrix.target }}
 
       - name: Prepare artifacts
         shell: bash
         run: |
           mkdir -p "$ARTIFACT_DIR"
           cp UNLICENSE "$ARTIFACT_DIR/"
+          cp THIRD-PARTY-NOTICES "$ARTIFACT_DIR/"
           cp README.md "$ARTIFACT_DIR/"
           cp "target/$TARGET/release/client-patcher${{ matrix.suffix }}" "$ARTIFACT_DIR/"
 
