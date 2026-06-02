@@ -63,10 +63,19 @@ fn wowfix335_mail_fix(wow: &mut [u8]) {
     patch(wow, 0x16D899, &[0x05, 0x01, 0x00, 0x00, 0x00]);
 }
 
+fn show_cast_bars(wow: &mut [u8]) {
+    nop(wow, 0x123676, 7);
+    nop(wow, 0x1241C6, 1);
+    nop(wow, 0x1241C9, 5);
+    nop(wow, 0x320273, 6);
+    nop(wow, 0x320282, 6);
+}
+
 pub fn patch_wow(wow: &mut [u8], config: &Config) {
     if config.is_enabled("LargeAddressAware") { large_address_aware(wow); }
     if config.is_enabled("RCEFixes")          { rce_fixes(wow); }
     if config.is_enabled("WoWFix335")         { wowfix335(wow); }
     if config.is_enabled("WoWFix335MailFix")  { wowfix335_mail_fix(wow); }
+    if config.is_enabled("ShowCastBars")      { show_cast_bars(wow); }
     if config.is_enabled("UpdatePEChecksum")  { update_pe_checksum(wow); }
 }

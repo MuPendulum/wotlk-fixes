@@ -19,6 +19,7 @@ All keys are under `[Patches]` in `config.ini` and accept `true` or `false`.
 | RCEFixes           | Patches known remote code execution vulnerabilities.           |
 | WoWFix335          | Miscellaneous gameplay and rendering fixes.                    |
 | WoWFix335MailFix   | Removes the 60-second wait before new mail appears.            |
+| ShowCastBars       | Shows cast bars on all default nameplates.                     |
 | UpdatePEChecksum   | Recomputes the PE checksum.                                    |
 
 ## Building
@@ -30,3 +31,4 @@ cargo build --release
 ## Credits
 
 - [robinsch](https://github.com/robinsch) — RCE fixes & WoWFix335
+- [kebabstorm](https://github.com/anzz1) — Cast Bar Fix
