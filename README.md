@@ -20,6 +20,7 @@ All keys are under `[Patches]` in `config.ini` and accept `true` or `false`.
 | WoWFix335          | Miscellaneous gameplay and rendering fixes.                    |
 | WoWFix335MailFix   | Removes the 60-second wait before new mail appears.            |
 | ShowCastBars       | Shows cast bars on all default nameplates.                     |
+| AwesomeWotLK       | Adds Awesome WotLK support.                                    |
 | UpdatePEChecksum   | Recomputes the PE checksum.                                    |
 
 ## Building
@@ -32,3 +33,4 @@ cargo build --release
 
 - [robinsch](https://github.com/robinsch) — RCE fixes & WoWFix335
 - [kebabstorm](https://github.com/anzz1) — Cast Bar Fix
+- [FrostAtom](https://github.com/FrostAtom) — Awesome WotLK

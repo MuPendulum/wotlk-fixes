@@ -71,11 +71,49 @@ fn show_cast_bars(wow: &mut [u8]) {
     nop(wow, 0x320282, 6);
 }
 
+fn awesome_wotlk(wow: &mut [u8]) {
+    // lua_ScanDllStart
+    patch(wow, 0xDC0F0,
+        &[
+            0xB8, 0x00, 0x00, 0x00, 0x00, // mov eax, 0
+            0xC3,                         // ret
+        ],
+    );
+
+    // ScanDllStart
+    patch(wow, 0xE50B0,
+        &[
+            0xB8, 0x01, 0x00, 0x00, 0x00, // mov eax, 1
+            0xA3, 0x74, 0xB4, 0xB6, 0x00, // mov s_isScanDllFinished, eax
+            0x68, 0xE0, 0x5C, 0x4E, 0x00, // push AwesomeWotlkLib.dll
+            0xE8, 0x1C, 0x68, 0x38, 0x00, // call _loadddll
+            0x83, 0xC4, 0x04,             // add esp, 4
+            0x55,                         // push ebp
+            0x8B, 0xEC,                   // mov ebp, esp
+            0xE8, 0xA1, 0x10, 0xF2, 0xFF, // call 0x00406D70
+            0xE9, 0x04, 0x5B, 0xF2, 0xFF, // jmp 0x0040B7D8
+            // int3 (12 times)
+            0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
+            // AwesomeWotlkLib.dll
+            0x41, 0x77, 0x65, 0x73, 0x6F, 0x6D, 0x65, 0x57, 0x6F, 0x74, 0x6C, 0x6B, 0x4C, 0x69, 0x62, 0x2E, 0x64, 0x6C, 0x6C, 0x00,
+        ],
+    );
+
+    // StartAddress
+    patch(wow, 0xABD0,
+        &[
+            0xE9, 0xDB, 0xA4, 0x0D, 0x00, // jmp 0x004E5CB0
+            0x90, 0x90, 0x90,             // nop (3 times)
+        ],
+    );
+}
+
 pub fn patch_wow(wow: &mut [u8], config: &Config) {
     if config.is_enabled("LargeAddressAware") { large_address_aware(wow); }
     if config.is_enabled("RCEFixes")          { rce_fixes(wow); }
     if config.is_enabled("WoWFix335")         { wowfix335(wow); }
     if config.is_enabled("WoWFix335MailFix")  { wowfix335_mail_fix(wow); }
     if config.is_enabled("ShowCastBars")      { show_cast_bars(wow); }
+    if config.is_enabled("AwesomeWotLK")      { awesome_wotlk(wow); }
     if config.is_enabled("UpdatePEChecksum")  { update_pe_checksum(wow); }
 }
